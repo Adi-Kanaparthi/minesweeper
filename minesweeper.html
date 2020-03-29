@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <script src="confetti.js"></script>
 <style>
 table, th, td{
+
+}
+
+table, th, td {
+  border-collapse: collapse;
   border: 1px solid black;
-
 }
 
-
-table {
-    table-layout:fixed;
-}
-table td {
-    width: 45px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+table td {  
     font-weight: bold;
     text-align: center;
-    font-size: 40px;
+    table-layout:inherit;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    font-size: 27px;
+    text-align: center;
+    vertical-align: middle;
 }
 
 .one {
@@ -45,17 +49,32 @@ table td {
     color: gray;
 }
 
-.cellButton {
-  font-size: 30px;
-  width: 45px;
-  height: 50px;
-  margin:0px 0px 0px 0px;
-  align-content: center;
-}
 .zero {
-  width: 45px;
-  height: 45px;
 }
+
+.block {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: #ddd;
+}
+
+.block:hover {
+  background-color: #eee;
+}
+
+.flag{
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px;  
+}
+
+.bomb{
+  width:100%;
+  height:100%; 
+}
+
 </style>
 
 </head>
@@ -63,33 +82,40 @@ table td {
 <button onclick="easyMode()">Easy</button>
 <button onclick="mediumMode()">Medium</button>
 <button onclick="hardMode()">Hard</button>
+<div>&nbsp</div>
 <table id="myTable">
-
 </table>
 </body>
 </html>
 <script type="text/javascript">
-  var n = 10;
-//debugger
+
+var n = 8;
+var bombCount = 10;
+var bombs;
+var flags;
+
+//start with easy mode
+easyMode();
+
 function easyMode() {
-  n = 5;
-  initialize(n);
-};
+  n = 8;
+  bombCount = 8;
+  initialize(n, bombCount);
+}
+
 function mediumMode() {
-  n = 10;
-  initialize(n);
-};
+  n = 14;
+  bombCount = 25;
+  initialize(n, bombCount);
+}
+
 function hardMode() {
-  n = 15;
-  initialize(n);
-};
-  var bombs;
-  var flags;
-  var myTable = document.getElementById("myTable");
-  var bombs = new Array(n).fill(0).map(() => new Array(n).fill(0));
-  var flags = new Array(n).fill(0).map(() => new Array(n).fill(0));
-  console.log(bombs);
-function initialize(n)
+  n = 20;
+  bombCount = 60;
+  initialize(n, bombCount);
+}
+
+function initialize(n, bombCount)
 {
   var table = document.getElementById("myTable");
   table.innerHTML = "";
@@ -103,21 +129,15 @@ function initialize(n)
     {
       var tableData = document.createElement("td");
       tableData.setAttribute("id", i+"."+j);
-      //tableData.setAttribute("class",);
-      tableData.innerHTML ='<div style = "align: center"><button type="button" class="cellButton" height:"40" width:"40" onclick="cellClicked('+i+','+j+')" oncontextmenu="cellRightClicked('+i+','+j+'); return false;" id = "b'+ i +'.'+ j +'" >&nbsp</button></div>';
+      tableData.innerHTML ='<button type="button" class="block" onclick="cellClicked('+i+','+j+')" oncontextmenu="cellRightClicked('+i+','+j+'); return false;" id = "b'+ i +'.'+ j +'" ></button>';
       tableRow.appendChild(tableData);
-      tableData.style.align = "center";
     }
     myTable.appendChild(tableRow);
   }
-  initializeBombs(bombs, n, n, n * 2);
+
+  initializeBombs(bombs, n, n, bombCount);
 }
 
-
-function showBomb (row, column) {
-    var bomb = document.getElementById(row + "." + column);
-    bomb.innerHTML = "<div class = 'cellButton'> <img src='https://storage.googleapis.com/replit/images/1545220146051_48f373ca2fe75d80cde9b1235a088351.pn' width = '40px' height = '40px align = 'center'> </div>";
-};
 function showNumber (row, column, number) {
     var cell = document.getElementById(row + "." + column);
     var wordForm;
@@ -171,19 +191,18 @@ function initializeBombs (bombs, rows, columns, bombCount) {
 
 function cellClicked (row, column) {
     var i, j, k, l;
-    debugger
+    //debugger
     if (flags[row][column] == 1) {
       return;
     };
+
     if (bombs[row][column] == 1) 
     {
       displayBombs(bombs, n, n);
-      alert("GAME OVER");
-
+      alert("You Lose!");
     } 
     else 
     {
-
       var bombCount = 0;
 
       for (i = row - 1; i <= row + 1 && i < n; i++) 
@@ -226,7 +245,7 @@ function cellClicked (row, column) {
       var gameStatus = isGameOver(bombs);
       if (gameStatus == true) 
       {
-          alert("YOU WIN");
+        alert("YOU WIN!!");
       };   
 };
 function cellRightClicked (row, column) 
@@ -235,12 +254,12 @@ function cellRightClicked (row, column)
   var button =  document.getElementById("b"+ row +'.'+ column);
   if (flags[row][column] == 0) 
   {//if there is not a flag already in the cell that was clicked then show a flag
-    button.innerHTML = "<img src='https://s3.us-east-2.amazonaws.com/upload-icon/uploads/icons/png/15574596561537355607-256.png' height='30' width='30' class='center'>";
+    button.innerHTML = "<img class='flag' src='https://cdn1.iconfinder.com/data/icons/color-bold-style/21/50-512.png  '>";
     flags[row][column] = 1;
   } 
   else 
-  {//else if there is a flag then remove the flag from that cell
-    button.innerHTML = "&nbsp";
+  {//else remove the flag from that cell
+    button.innerHTML = "";
     flags[row][column] = 0;
   };
 
@@ -273,17 +292,11 @@ for (var i = 0; i < rows; i++) {
   }
 }
 
+function showBomb (row, column) {
+    var bomb = document.getElementById(row + "." + column);
+    bomb.innerHTML = "<img class='bomb' src='http://getdrawings.com/free-icon/explode-icon-56.png'>";
 };
 
-initialize(n);
+};
 
 </script>
-
-
-
-
-
-
-
-
-
