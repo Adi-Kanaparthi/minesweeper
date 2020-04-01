@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="confetti.js"></script>
 <style>
 table, th, td{
 
@@ -51,6 +50,9 @@ table td {
 
 .zero {
 }
+.flagCount {
+ font-size: 30px;
+}
 
 .block {
   width: 100%;
@@ -74,17 +76,40 @@ table td {
   width:100%;
   height:100%; 
 }
+.rules {
+  border: 5px dashed red;
+  color:blue;
+}
 
 </style>
 
 </head>
 <body id = "body">
+  <br>
 <button onclick="easyMode()">Easy</button>
 <button onclick="mediumMode()">Medium</button>
-<button onclick="hardMode()">Hard</button>
+<button onclick="hardMode()">Hard</button>&nbsp&nbsp
+<img src="images/flag.webp"  height="30" width="30"><label class="flagCount" id="flagCounter"></label>
 <div>&nbsp</div>
 <table id="myTable">
 </table>
+<h1 class = "rules">Rules</h1>
+<p class = "rules">Instructions for MineSweeper:<br>
+
+You are presented with a board of squares. Some squares contain mines (bombs), others don't. If you click on a square containing a bomb, you lose. If you manage to click all the squares (without clicking on any bombs) you win.<br>
+Clicking a square which doesn't have a bomb reveals the number of neighbouring squares containing bombs. Use this information to avoid the bombs.<br>
+To open a square, point at the square and click on it. To mark a square you think is a bomb, point and right-click.<br></p>
+
+<p class="rules">Detailed Instructions:<br>
+
+A squares "neighbours" are the squares adjacent above, below, left, right, and all 4 diagonals. Squares on the sides of the board or in a corner have fewer neighbors. The board does not wrap around the edges.<br>
+If you open a square with 0 neighboring bombs, all its neighbors will automatically open. This can cause a large area to automatically open.
+To remove a bomb marker from a square, point at it and right-click again.<br>
+If you mark a bomb incorrectly, you will have to correct the mistake before you can win. Incorrect bomb marking doesn't kill you, but it can lead to mistakes which do.<br>
+You don't have to mark all the bombs to win; you just need to open all non-bomb squares.<br>
+</p>
+
+
 </body>
 </html>
 <script type="text/javascript">
@@ -93,6 +118,7 @@ var n = 8;
 var bombCount = 10;
 var bombs;
 var flags;
+var flagCount;
 
 //start with easy mode
 easyMode();
@@ -136,6 +162,28 @@ function initialize(n, bombCount)
   }
 
   initializeBombs(bombs, n, n, bombCount);
+  flagCount = getFlagCount();
+  updateFlagCount(flagCount);
+
+}
+function getFlagCount() {
+  var flags = 0;
+  for (var i = 0; i < n; i++) 
+  {
+      for (var j = 0; j < n; j++) 
+      {
+          if (bombs[i][j] == 1) 
+          {
+            flags++;
+          }; 
+      };
+  };
+  return flags;
+};
+
+function updateFlagCount (flagCount) {
+  var flagCounter =  document.getElementById("flagCounter");
+  flagCounter.innerHTML = flagCount;
 }
 
 function showNumber (row, column, number) {
@@ -250,17 +298,21 @@ function cellClicked (row, column) {
 };
 function cellRightClicked (row, column) 
 {
-  //debugger
+  debugger
   var button =  document.getElementById("b"+ row +'.'+ column);
   if (flags[row][column] == 0) 
   {//if there is not a flag already in the cell that was clicked then show a flag
     button.innerHTML = "<img class='flag' src='images/flag.webp'>";
     flags[row][column] = 1;
+    flagCount--;
+    updateFlagCount(flagCount);
   } 
   else 
   {//else remove the flag from that cell
     button.innerHTML = "";
     flags[row][column] = 0;
+    flagCount++;
+    updateFlagCount(flagCount);
   };
 
 };
